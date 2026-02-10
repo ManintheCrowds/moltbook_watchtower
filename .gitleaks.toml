@@ -1,0 +1,16 @@
+title = "Gitleaks configuration"
+
+[allowlist]
+description = "Binary and documentation files that often trigger false positives."
+paths = [
+  '''.*\.md$''',
+  '''.*\.lock$''',
+  '''.*\.svg$''',
+  '''.*\.png$''',
+  '''.*\.jpg$''',
+  '''.*\.jpeg$''',
+  '''.*\.gif$''',
+  '''.*\.pdf$''',
+  '''.*\.min\.js$''',
+  '''.*\.map$'''
+]
