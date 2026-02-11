@@ -1,42 +1,87 @@
-# Moltbook Watchtower
+# Moltbook Watchtower — Passive Monitoring for the Moltbook Agent Network
 
-Passive, read-only monitoring for the Moltbook (OpenClaw) agent network: collect posts and comments, run leak/injection/behavior analyzers, and view findings in a static dashboard. No posting or writing to Moltbook.
+Passive monitoring and analysis so we can detect leaks, injection patterns, and behavior issues without writing to the network.
 
-- **Setup and go live:** [docs/SETUP.md](docs/SETUP.md) — API key (pending until claimed), go-live steps, link to [Moltbook skill.md](https://www.moltbook.com/skill.md).
-- **Security and ethics:** [docs/SECURITY.md](docs/SECURITY.md), [docs/MOLTBOOK_ETHICS.md](docs/MOLTBOOK_ETHICS.md).
-- **Runbooks:** [docs/runbooks/](docs/runbooks/) — daily collect-and-report, incidents, Signal alerting, add analyzer.
-- **API audit:** [docs/MOLTBOOK_API_AUDIT.md](docs/MOLTBOOK_API_AUDIT.md) — endpoints and response handling vs skill.md.
-- **Scheduled runs:** Use `python scripts/run_daily.py` for the full daily pipeline (optional collector, analyzers, report, dashboard, export, and optional [Ollama](https://ollama.ai) narrative summary). See runbook for cron and Windows Task Scheduler. Set `OLLAMA_ENABLED=1` and pull a model (e.g. `ollama pull llama3.2`) for the daily LLM summary.
+**Python 3.10+**
+
+## Problem → Solution → Impact
+
+- **Problem:** Moltbook agent networks generate content that may leak credentials, exhibit injection patterns, or drift from expected behavior. Manual review doesn't scale; active probes would contaminate the network.
+- **Solution:** Read-only watchdog agent collects posts, feed, submolts, and comments from the Moltbook API. Analyzers (leak, injection, behavior, linguistic) run locally over stored data. Static dashboard and daily reports surface findings without ever posting to the network.
+- **Impact:** Detects credential leaks and injection patterns before they spread; grounded-ratio and linguistic monitors surface drift; all analysis is local and read-only.
+
+## Architecture
+
+```mermaid
+flowchart LR
+  subgraph external [Moltbook API]
+    API[GET posts, feed, submolts, comments]
+  end
+  subgraph watchtower [Watchtower]
+    Collector[run_collector.py]
+    Analyzers[run_analyzers.py]
+    Dashboard[generate_dashboard_html.py]
+    Report[report_summary.py]
+    Collector --> Analyzers
+    Analyzers --> Dashboard
+    Analyzers --> Report
+  end
+  API -->|Read-only| Collector
+  Collector -->|SQLite| Analyzers
+```
+
+## Features
+
+- **Read-only collector** — Fetches posts, feed, submolts, comments via watchdog agent; rate-limited (90 req/min)
+- **Leak analyzer** — Detects credential patterns (API keys, passwords, tokens)
+- **Injection analyzer** — Detects prompt-injection–style content
+- **Behavior analyzer** — Tracks agent behavior patterns
+- **Linguistic analyzer** — Monitors grounded ratios and language drift
+- **Static dashboard** — HTML dashboard with tables and graphs (no server)
+- **Daily reports** — Optional markdown summaries for cron
+- **Optional alerting** — Signal, Slack, or email on critical findings
+
+## Tech stack
+
+Python 3.10+, requests, python-dotenv, SQLite.
 
 ## Quick start
 
-1. Copy `.env.example` to `.env` and set `MOLTBOOK_API_KEY` (see [docs/SETUP.md](docs/SETUP.md)).
-2. `pip install -r requirements.txt`
-3. From repo root: `python scripts/run_collector.py` then `python scripts/run_analyzers.py` then `python scripts/generate_dashboard_html.py`.
-4. Open `exports/dashboard.html` (or serve it) to view tables and charts.
-
-**Offline / no API:** If you already have a DB (e.g. from a previous collect) and don't want to call the Moltbook API, run only the analysis and report steps — no `MOLTBOOK_API_KEY` needed:
-
 ```bash
+git clone <repo-url>
+cd moltbook-watchtower
+cp .env.example .env
+# Edit .env: set MOLTBOOK_API_KEY (register watchdog at https://www.moltbook.com/skill.md)
+pip install -r requirements.txt
+
+# Collect from live API
+python scripts/run_collector.py
+
+# Run analyzers
 python scripts/run_analyzers.py
-python scripts/report_summary.py
+
+# Generate dashboard
 python scripts/generate_dashboard_html.py
-python scripts/export_network.py   # optional
+# Open exports/dashboard.html in browser
 ```
 
-Or use the convenience script: `python scripts/run_offline.py`. Outputs go to `data/exports/` (or `$DATA_DIR/exports/`). See [docs/OFFLINE_NO_API_AUDIT.md](docs/OFFLINE_NO_API_AUDIT.md) for details.
+See [docs/SETUP.md](docs/SETUP.md) for API key registration and full go-live steps.
+
+## Documentation
+
+- [Setup and go live](docs/SETUP.md)
+- [Security](docs/SECURITY.md) — API key handling, storage, logging
+- [Runbooks](docs/runbooks/) — Daily cron, API failure, rate limit, add analyzer, Signal alerting
+- [Moltbook API audit](docs/MOLTBOOK_API_AUDIT.md)
 
 ## Testing
 
-From repo root: `pytest tests/ -v` (or `python -m pytest tests/ -v`).
+```bash
+pytest tests/ -v
+```
 
-## Layout
+58 unit + integration tests.
 
-- `config/` — env-based settings (API key, paths, optional Signal, daily report dir).
-- `src/client/` — read-only Moltbook API client (GET only, rate limited).
-- `src/storage/` — SQLite schema and writer (posts, comments, findings).
-- `src/analyzers/` — leak, injection, behavior analyzers.
-- `src/alerting/` — Signal alert stub (optional).
-- `src/scheduler/` — audit log (metadata only, no content).
-- `src/summary/` — daily data, prompt builder, Ollama client for optional LLM summary.
-- `scripts/` — run_collector, run_analyzers, report_summary, generate_dashboard_html, run_daily, generate_daily_summary.
+## License
+
+MIT (see [LICENSE](LICENSE)).
