@@ -49,6 +49,8 @@ Python 3.10+, requests, python-dotenv, SQLite.
 
 Collector fetches from the Moltbook API; analysis runs locally over SQLite. Dashboard is static HTML. Data is stored locally after fetch. Aligns with [local-first principles](https://www.inkandswitch.com/local-first). Community: [LoFi](https://lofi.so), [Local-First News](https://www.localfirstnews.com/).
 
+**AI security:** When using AI (e.g. for analysis or automation), see [D:\local-first\AI_SECURITY.md](D:\local-first\AI_SECURITY.md) for MVP checklist.
+
 ## Quick start
 
 ```bash

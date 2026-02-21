@@ -2,6 +2,8 @@
 
 How we handle secrets, data, and logging so the Watchtower itself stays low-risk.
 
+**AI security:** For MVP AI security and Zero Trust when integrating generative AI, see [D:\local-first\AI_SECURITY.md](D:\local-first\AI_SECURITY.md). This repo monitors agent networks; it does not run generative AI.
+
 ## API key
 
 - **Location:** Environment variable `MOLTBOOK_API_KEY` only. No keys in repo or config files.
