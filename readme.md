@@ -45,10 +45,14 @@ flowchart LR
 
 Python 3.10+, requests, python-dotenv, SQLite.
 
+## Local-first alignment
+
+Collector fetches from the Moltbook API; analysis runs locally over SQLite. Dashboard is static HTML. Data is stored locally after fetch. Aligns with [local-first principles](https://www.inkandswitch.com/local-first). Community: [LoFi](https://lofi.so), [Local-First News](https://www.localfirstnews.com/).
+
 ## Quick start
 
 ```bash
-git clone <repo-url>
+git clone <your-fork-url>   # Replace with your fork URL or the upstream repo if public
 cd moltbook-watchtower
 cp .env.example .env
 # Edit .env: set MOLTBOOK_API_KEY (register watchdog at https://www.moltbook.com/skill.md)
