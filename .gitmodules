@@ -1,0 +1,3 @@
+[submodule ".cursor/plans"]
+	path = .cursor/plans
+	url = https://github.com/ManintheCrowds/Planswithinplans.git
