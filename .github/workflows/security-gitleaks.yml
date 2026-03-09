@@ -1,6 +1,6 @@
 # PURPOSE: Secret scan with Gitleaks on push/PR.
 # DEPENDENCIES: .gitleaks.toml
-# MODIFICATION NOTES: Copy from CodeRepositories; per portfolio deep evaluation plan.
+# MODIFICATION NOTES: Copy from portfolio-harness; per portfolio deep evaluation plan.
 
 name: Secret Scan (Gitleaks)
 
