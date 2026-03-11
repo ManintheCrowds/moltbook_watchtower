@@ -91,3 +91,5 @@ pytest tests/ -v
 ## License
 
 MIT (see [LICENSE](LICENSE)).
+
+*Built by a programmer who ships. See [portfolio-harness/docs/AUTHOR.md](../portfolio-harness/docs/AUTHOR.md) if viewing from sibling workspace.*
