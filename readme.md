@@ -82,9 +82,13 @@ See [docs/SETUP.md](docs/SETUP.md) for API key registration and full go-live ste
 
 ## Testing
 
+**Same command as CI** ([`.github/workflows/tests.yml`](.github/workflows/tests.yml)):
+
 ```bash
-pytest tests/ -v
+python -m pytest tests/ -v --tb=short
 ```
+
+(`pytest tests/ -v` is equivalent if `pytest` is on your PATH.)
 
 58 unit + integration tests.
 
