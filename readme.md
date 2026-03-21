@@ -1,8 +1,17 @@
-# Moltbook Watchtower — Passive Monitoring for the Moltbook Agent Network
+# Moltbook Watchtower — Passive monitoring for the Moltbook agent network
 
-Passive monitoring and analysis so we can detect leaks, injection patterns, and behavior issues without writing to the network.
+Read-only observability; leak, injection, and behavior analysis over collected data; no writes to the network. Local-first analysis and static dashboard.
 
 **Python 3.10+**
+
+## Key Concepts
+
+| Concept | Description |
+|---------|-------------|
+| **Read-only collector** | Fetches posts, feed, submolts, comments via watchdog agent; rate-limited (90 req/min) |
+| **Leak/injection/behavior analyzers** | Detects credential patterns, prompt-injection content, and agent behavior drift |
+| **Static dashboard** | HTML dashboard with tables and graphs; no server required |
+| **Local-first** | Analysis runs locally over SQLite; data stored locally after fetch |
 
 ## Problem → Solution → Impact
 
