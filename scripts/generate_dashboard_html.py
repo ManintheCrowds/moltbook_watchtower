@@ -3,6 +3,7 @@
 # DEPENDENCIES: config, src.storage
 # MODIFICATION NOTES: Embeds JSON in HTML for single-file portability; exports/dashboard.html (gitignored).
 
+import html as html_lib
 import json
 import re
 import sys
@@ -21,6 +22,14 @@ from src.storage import get_connection
 _STOPWORDS = frozenset(
     "the and for is to of in it you that he was on are with as his they at be this have from or one had by word but not what all were we when your can said there use each which she do how their if will up out many then them these so some her would make like into him time two more no go way could my than first been call who oil sit now find long down day did get come made may part".split()
 )
+
+
+def _captioned_table(caption: str, thead_tr: str, tbody_html: str) -> str:
+    """Table with screen-reader-only caption (mirrors section heading)."""
+    return (
+        f'<table class="data-table" border="0"><caption class="visually-hidden">{html_lib.escape(caption)}</caption>'
+        f"<thead>{thead_tr}</thead><tbody>{tbody_html}</tbody></table>"
+    )
 
 
 def _tokenize_word_freq(texts: list[str], top_n: int = 80) -> list[list]:
@@ -374,116 +383,237 @@ def main() -> None:
         for r in grounded_trend
     ) or "<tr><td colspan='3'>No data</td></tr>"
 
-    html = f"""<!DOCTYPE html>
-<html>
+    html_document = f"""<!DOCTYPE html>
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <title>Moltbook Watchtower</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700&amp;family=Source+Sans+3:ital,wght@0,400;0,600;1,400&amp;display=swap" rel="stylesheet">
+<style>
+:root {{
+  --font-sans: "Source Sans 3", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --color-bg: #0d1117;
+  --color-surface: #161b22;
+  --color-border: #30363d;
+  --color-text: #e6edf3;
+  --color-muted: #8b949e;
+  --color-accent: #58a6ff;
+  --color-accent-warm: #c9a227;
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.75rem;
+  --space-xl: 2.5rem;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+}}
+* {{ box-sizing: border-box; }}
+html {{ scroll-behavior: smooth; }}
+body.dashboard-body {{
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.55;
+  color: var(--color-text);
+  background: var(--color-bg);
+  background-image: radial-gradient(ellipse 100% 60% at 50% -15%, rgba(88, 166, 255, 0.07), transparent 55%);
+}}
+main#main-content.dashboard-main {{
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: var(--space-lg) var(--space-md) var(--space-xl);
+  overflow-x: auto;
+}}
+@media (prefers-reduced-motion: no-preference) {{
+  @keyframes dashboardReveal {{
+    from {{ opacity: 0; transform: translateY(6px); }}
+    to {{ opacity: 1; transform: none; }}
+  }}
+  main#main-content.dashboard-main {{
+    animation: dashboardReveal 0.42s ease-out;
+  }}
+}}
+@media (prefers-reduced-motion: reduce) {{
+  html {{ scroll-behavior: auto; }}
+}}
+h1 {{
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: clamp(1.45rem, 3.5vw, 1.95rem);
+  letter-spacing: -0.03em;
+  margin: 0 0 var(--space-md);
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--color-border);
+}}
+h2 {{
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 1.08rem;
+  margin: var(--space-xl) 0 var(--space-md);
+  color: var(--color-accent-warm);
+  letter-spacing: 0.03em;
+}}
+h3 {{
+  font-size: 0.98rem;
+  font-weight: 600;
+  margin: var(--space-lg) 0 var(--space-sm);
+  color: var(--color-muted);
+}}
+main#main-content > p {{ margin: 0 0 var(--space-md); color: var(--color-muted); }}
+main#main-content > p small {{ font-size: 0.875rem; }}
+table.data-table {{
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--color-border);
+  margin-bottom: var(--space-md);
+}}
+table.data-table th,
+table.data-table td {{
+  padding: var(--space-sm) var(--space-md);
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+}}
+table.data-table th {{
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-accent);
+  background: rgba(88, 166, 255, 0.06);
+}}
+table.data-table tbody tr:last-child td {{ border-bottom: none; }}
+table.data-table tbody tr:hover td {{ background: rgba(255, 255, 255, 0.035); }}
+canvas[role="img"] {{
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: var(--space-sm) 0 var(--space-md);
+  border-radius: var(--radius-sm);
+}}
+.network-panel {{
+  width: 100%;
+  max-width: 800px;
+  height: 400px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  margin: var(--space-sm) 0 var(--space-md);
+}}
+p.empty-state {{ color: var(--color-muted); font-size: 0.875rem; font-style: italic; }}
+footer.dashboard-footer {{
+  margin-top: var(--space-xl);
+  padding: var(--space-lg) var(--space-md);
+  font-size: 0.875rem;
+  color: var(--color-muted);
+  border-top: 1px solid var(--color-border);
+  background: var(--color-surface);
+}}
+footer.dashboard-footer code {{
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  background: var(--color-bg);
+  padding: 0.15em 0.45em;
+  border-radius: var(--radius-sm);
+  color: var(--color-accent-warm);
+}}
+.visually-hidden {{ position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }}
+@media (max-width: 720px) {{
+  main#main-content.dashboard-main {{ padding: var(--space-md) var(--space-sm); }}
+}}
+</style>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/wordcloud2.js/1.0.2/wordcloud2.min.js"></script>
 </head>
-<body>
+<body class="dashboard-body">
+<main id="main-content" class="dashboard-main">
 <h1>Moltbook Watchtower</h1>
 <p>Total posts: <strong>{total_posts}</strong> | Total comments: <strong>{total_comments}</strong> | Total findings: <strong>{total_findings}</strong></p>
 <p><small>Last generated: {last_generated}</small></p>
 
 <h2>Findings by rule</h2>
-<table border="1">
-<thead><tr><th>rule_id</th><th>severity</th><th>count</th></tr></thead>
-<tbody>{rows_html}</tbody>
-</table>
+{_captioned_table("Findings by rule", "<tr><th>rule_id</th><th>severity</th><th>count</th></tr>", rows_html)}
 
 <h2>Recent findings (last 50)</h2>
-<table border="1">
-<thead><tr><th>post_id</th><th>comment_id</th><th>rule_id</th><th>severity</th><th>redacted_snippet</th><th>created_at</th></tr></thead>
-<tbody>{recent_rows}</tbody>
-</table>
+{_captioned_table("Recent findings (last 50)", "<tr><th>post_id</th><th>comment_id</th><th>rule_id</th><th>severity</th><th>redacted_snippet</th><th>created_at</th></tr>", recent_rows)}
 
 <h2>Top submolts by post count</h2>
-<table border="1">
-<thead><tr><th>submolt</th><th>count</th></tr></thead>
-<tbody>{submolt_rows}</tbody>
-</table>
+{_captioned_table("Top submolts by post count", "<tr><th>submolt</th><th>count</th></tr>", submolt_rows)}
 
 <h2>Top agents by posts</h2>
-<table border="1">
-<thead><tr><th>agent_name</th><th>count</th></tr></thead>
-<tbody>{top_agents_posts_rows}</tbody>
-</table>
+{_captioned_table("Top agents by posts", "<tr><th>agent_name</th><th>count</th></tr>", top_agents_posts_rows)}
 
 <h2>Top agents by comments</h2>
-<table border="1">
-<thead><tr><th>agent_name</th><th>count</th></tr></thead>
-<tbody>{top_agents_comments_rows}</tbody>
-</table>
+{_captioned_table("Top agents by comments", "<tr><th>agent_name</th><th>count</th></tr>", top_agents_comments_rows)}
 
 <h2>Recent behavior metrics</h2>
-<table border="1">
-<thead><tr><th>metric_type</th><th>key_name</th><th>value_int</th><th>created_at</th></tr></thead>
-<tbody>{behavior_rows}</tbody>
-</table>
+{_captioned_table("Recent behavior metrics", "<tr><th>metric_type</th><th>key_name</th><th>value_int</th><th>created_at</th></tr>", behavior_rows)}
 
 <h2>Grounded vs rhetoric (distinct items)</h2>
 <p>Items = post or comment with at least one grounded_* or ling_*/drift_* finding.</p>
 <h3>Per agent (top 20)</h3>
-<table border="1">
-<thead><tr><th>agent_name</th><th>grounded_items</th><th>rhetoric_items</th><th>total</th></tr></thead>
-<tbody>{agent_grounded_rows}</tbody>
-</table>
+{_captioned_table("Grounded vs rhetoric: per agent (top 20)", "<tr><th>agent_name</th><th>grounded_items</th><th>rhetoric_items</th><th>total</th></tr>", agent_grounded_rows)}
 <h3>Per submolt (top 15)</h3>
-<table border="1">
-<thead><tr><th>submolt</th><th>grounded_items</th><th>rhetoric_items</th><th>total</th></tr></thead>
-<tbody>{submolt_grounded_rows}</tbody>
-</table>
+{_captioned_table("Grounded vs rhetoric: per submolt (top 15)", "<tr><th>submolt</th><th>grounded_items</th><th>rhetoric_items</th><th>total</th></tr>", submolt_grounded_rows)}
 <h3>Trend (findings per day)</h3>
-<table border="1">
-<thead><tr><th>date</th><th>grounded</th><th>rhetoric</th></tr></thead>
-<tbody>{grounded_trend_rows}</tbody>
-</table>
+{_captioned_table("Grounded vs rhetoric: trend (findings per day)", "<tr><th>date</th><th>grounded</th><th>rhetoric</th></tr>", grounded_trend_rows)}
 
 <h2>Findings by severity (pie)</h2>
-<canvas id="chartSeverityPie" width="300" height="200"></canvas>
+<canvas id="chartSeverityPie" width="300" height="200" role="img" aria-label="Chart: findings by severity (pie)"></canvas>
 <p id="emptySeverityPie" class="empty-state" style="display:none">No data for this period</p>
 
 <h2>Posts over time (daily)</h2>
-<canvas id="chartPostsOverTime" width="400" height="150"></canvas>
+<canvas id="chartPostsOverTime" width="400" height="150" role="img" aria-label="Chart: posts over time (daily)"></canvas>
 <p id="emptyPostsOverTime" class="empty-state" style="display:none">No data for this period</p>
 
 <h2>Findings over time (daily)</h2>
-<canvas id="chartFindingsOverTime" width="400" height="150"></canvas>
+<canvas id="chartFindingsOverTime" width="400" height="150" role="img" aria-label="Chart: findings over time (daily)"></canvas>
 <p id="emptyFindingsOverTime" class="empty-state" style="display:none">No data for this period</p>
 
 <h2>Behavior metrics over time (daily)</h2>
-<canvas id="chartBehaviorOverTime" width="400" height="150"></canvas>
+<canvas id="chartBehaviorOverTime" width="400" height="150" role="img" aria-label="Chart: behavior metrics over time (daily)"></canvas>
 <p id="emptyBehaviorOverTime" class="empty-state" style="display:none">No data for this period</p>
 
 <h2>Findings by rule (bar)</h2>
-<canvas id="chartFindingsByRule" width="400" height="200"></canvas>
+<canvas id="chartFindingsByRule" width="400" height="200" role="img" aria-label="Chart: findings by rule (bar)"></canvas>
 <p id="emptyFindingsByRule" class="empty-state" style="display:none">No data for this period</p>
 
 <h2>Comments per post (top 10)</h2>
-<canvas id="chartCommentsPerPost" width="400" height="200"></canvas>
+<canvas id="chartCommentsPerPost" width="400" height="200" role="img" aria-label="Chart: comments per post (top 10)"></canvas>
 <p id="emptyCommentsPerPost" class="empty-state" style="display:none">No data for this period</p>
 
 <h2>Agent activity heatmap (last 14 days)</h2>
-<table border="1"><thead><tr><th>Agent</th>{heatmap_header}</tr></thead><tbody>{heatmap_rows_html}</tbody></table>
+<table class="data-table" border="0"><caption class="visually-hidden">{html_lib.escape("Agent activity heatmap (last 14 days)")}</caption><thead><tr><th>Agent</th>{heatmap_header}</tr></thead><tbody>{heatmap_rows_html}</tbody></table>
 
 <h2>Network: Agent–Submolt</h2>
-<div id="networkGraph" style="width: 100%; max-width: 800px; height: 400px;"></div>
+<p class="visually-hidden">Interactive network visualization: agents connected to submolts by post volume.</p>
+<div id="networkGraph" class="network-panel" aria-label="Agent and submolt network graph"></div>
 <p id="emptyNetwork" class="empty-state" style="display:none">No data for this period</p>
 
 <h2>Comment threads (sample)</h2>
-<div id="networkCommentGraph" style="width: 100%; max-width: 800px; height: 400px;"></div>
+<p class="visually-hidden">Interactive network visualization: comment threads between posts and comments.</p>
+<div id="networkCommentGraph" class="network-panel" aria-label="Comment thread network graph"></div>
 <p id="emptyNetworkComment" class="empty-state" style="display:none">No data for this period</p>
 
 <h2>Word cloud: Molts (posts &amp; comments)</h2>
-<canvas id="wordcloudMolts" width="700" height="350"></canvas>
+<canvas id="wordcloudMolts" width="700" height="350" role="img" aria-label="Word cloud: frequent words in molts (posts and comments)"></canvas>
 <p id="emptyWordcloudMolts" class="empty-state" style="display:none">No text data for this period</p>
 
 <h2>Word cloud: Submolts (names &amp; descriptions)</h2>
-<canvas id="wordcloudSubmolts" width="700" height="300"></canvas>
+<canvas id="wordcloudSubmolts" width="700" height="300" role="img" aria-label="Word cloud: submolt names and descriptions"></canvas>
 <p id="emptyWordcloudSubmolts" class="empty-state" style="display:none">No submolt data for this period</p>
+</main>
 
 <script type="application/json" id="dashboardData">{data_json}</script>
 <script>
@@ -656,7 +786,7 @@ def main() -> None:
   }}
 }})();
 </script>
-<footer style="margin-top:2em; font-size:0.9em; color:#666;">
+<footer class="dashboard-footer">
 <p>Export network data: run <code>python scripts/export_network.py</code>; see <code>docs/TELEMETRY_AND_NETWORK_VIZ.md</code> for Gephi, NodeXL, Cytoscape, etc.</p>
 </footer>
 </body>
@@ -665,7 +795,7 @@ def main() -> None:
     exports = settings.db_path.parent / "exports"
     exports.mkdir(parents=True, exist_ok=True)
     path = exports / "dashboard.html"
-    path.write_text(html, encoding="utf-8")
+    path.write_text(html_document, encoding="utf-8")
     print(f"Wrote {path}")
 
 

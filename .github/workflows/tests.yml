@@ -24,5 +24,8 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Install Playwright browser (Chromium)
+        run: python -m playwright install chromium
+
       - name: Run pytest
         run: python -m pytest tests/ -v --tb=short
