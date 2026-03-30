@@ -616,7 +616,7 @@ footer.dashboard-footer code {{
 </main>
 
 <script type="application/json" id="dashboardData">{data_json}</script>
-<script>
+<script id="dashboard-runtime">
 (function() {{
   var raw = document.getElementById('dashboardData').textContent;
   var data = JSON.parse(raw);

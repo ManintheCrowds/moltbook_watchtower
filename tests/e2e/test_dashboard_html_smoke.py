@@ -46,6 +46,7 @@ def dashboard_html_url(tmp_path, monkeypatch):
         thread.join(timeout=5)
 
 
+@pytest.mark.e2e
 def test_dashboard_html_smoke(page: Page, dashboard_html_url: str) -> None:
     """Generated dashboard loads without console errors; key sections and title present."""
     console_errors: list[str] = []

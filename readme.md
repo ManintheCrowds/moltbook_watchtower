@@ -94,12 +94,16 @@ See [docs/SETUP.md](docs/SETUP.md) for API key registration and full go-live ste
 **Same command as CI** ([`.github/workflows/tests.yml`](.github/workflows/tests.yml)):
 
 ```bash
+pip install -r requirements.txt
+python -m playwright install chromium   # once per machine; CI does this automatically
 python -m pytest tests/ -v --tb=short
 ```
 
 (`pytest tests/ -v` is equivalent if `pytest` is on your PATH.)
 
-58 unit + integration tests.
+Dashboard GUI smoke only: `python -m pytest tests/e2e/ -m e2e -v` (see [docs/audit/gui-2026-03-26.md](docs/audit/gui-2026-03-26.md)).
+
+Unit, integration, and Playwright e2e tests (59 total including one browser smoke test).
 
 ## License
 
