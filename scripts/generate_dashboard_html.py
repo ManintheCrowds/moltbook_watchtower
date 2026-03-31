@@ -728,8 +728,28 @@ table.sr-chart-table {{
   outline-offset: 2px;
   border-radius: var(--radius-md);
 }}
+/* MW-7 responsive */
 @media (max-width: 720px) {{
   main#main-content.dashboard-main {{ padding: var(--space-md) var(--space-sm); }}
+  h1 {{
+    font-size: clamp(1.2rem, 5.2vw, 1.65rem);
+    margin-bottom: var(--space-sm);
+  }}
+  h2 {{ margin-top: var(--space-lg); margin-bottom: var(--space-sm); }}
+  h3 {{ margin-top: var(--space-md); }}
+  table.data-table th,
+  table.data-table td {{
+    padding: var(--space-xs) var(--space-sm);
+    font-size: 0.8125rem;
+  }}
+  .network-panel {{
+    height: min(320px, 55vh);
+    max-width: 100%;
+  }}
+  footer.dashboard-footer {{
+    padding: var(--space-md) var(--space-sm);
+    font-size: 0.8125rem;
+  }}
 }}
 /* MW-6: print — light paper, tables/charts avoid awkward splits; SR data tables visible on paper */
 @media print {{

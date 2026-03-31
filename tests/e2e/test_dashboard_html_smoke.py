@@ -128,4 +128,12 @@ def test_dashboard_html_smoke(page: Page, dashboard_html_url: str) -> None:
     )
     assert has_print_css, "expected @media print rules in embedded stylesheet"
 
+    # MW-7: responsive block marker (generate_dashboard_html.py)
+    has_mw7_css = page.evaluate(
+        """() => Array.from(document.querySelectorAll("style")).some(
+      (s) => s.textContent && s.textContent.includes("/* MW-7 responsive */")
+    )"""
+    )
+    assert has_mw7_css, "expected /* MW-7 responsive */ in embedded stylesheet"
+
     assert not console_errors, f"browser console errors: {console_errors}"
