@@ -40,6 +40,60 @@ def _tokenize_word_freq(texts: list[str], top_n: int = 80) -> list[list]:
     return [[w, c] for w, c in counts.most_common(top_n)]
 
 
+_SR_MAX_BEHAVIOR_ROWS = 300
+
+
+def _sr_chart_table(table_id: str, caption: str, thead_tr: str, tbody_html: str) -> str:
+    """Off-screen data table for screen readers; id matches canvas aria-describedby."""
+    return (
+        f'<table id="{table_id}" class="sr-chart-table data-table" border="0">'
+        f"<caption>{html_lib.escape(caption)}</caption>"
+        f"<thead>{thead_tr}</thead><tbody>{tbody_html}</tbody></table>"
+    )
+
+
+def _sr_network_block(
+    block_id: str,
+    intro: str,
+    nodes: list[dict],
+    edges: list[dict],
+) -> str:
+    """Nodes and edges tables for SR; block id is network aria-describedby target."""
+    if not nodes and not edges:
+        tbody_n = "<tr><td colspan=\"3\">No data for this period</td></tr>"
+        tbody_e = "<tr><td colspan=\"3\">No data for this period</td></tr>"
+    else:
+        tbody_n = "".join(
+            "<tr>"
+            f"<td>{html_lib.escape(str(n.get('id', '')))}</td>"
+            f"<td>{html_lib.escape(str(n.get('label', '')))}</td>"
+            f"<td>{html_lib.escape(str(n.get('type', '')))}</td>"
+            "</tr>"
+            for n in nodes
+        ) or "<tr><td colspan=\"3\">No nodes</td></tr>"
+        tbody_e = "".join(
+            "<tr>"
+            f"<td>{html_lib.escape(str(e.get('from', '')))}</td>"
+            f"<td>{html_lib.escape(str(e.get('to', '')))}</td>"
+            f"<td>{html_lib.escape(str(e.get('value', '')))}</td>"
+            "</tr>"
+            for e in edges
+        ) or "<tr><td colspan=\"3\">No edges</td></tr>"
+    return (
+        f'<div id="{block_id}" class="sr-only-chart-block">'
+        f'<p class="visually-hidden">{html_lib.escape(intro)}</p>'
+        '<table class="sr-chart-table data-table" border="0">'
+        "<caption>Network nodes</caption>"
+        "<thead><tr><th>id</th><th>label</th><th>type</th></tr></thead>"
+        f"<tbody>{tbody_n}</tbody></table>"
+        '<table class="sr-chart-table data-table" border="0">'
+        "<caption>Network edges</caption>"
+        "<thead><tr><th>from</th><th>to</th><th>value</th></tr></thead>"
+        f"<tbody>{tbody_e}</tbody></table>"
+        "</div>"
+    )
+
+
 def main() -> None:
     settings = get_settings(require_api_key=False)
     conn = get_connection(settings.db_path)
@@ -383,6 +437,133 @@ def main() -> None:
         for r in grounded_trend
     ) or "<tr><td colspan='3'>No data</td></tr>"
 
+    # MW-3: SR-only tables for aria-describedby (same data as charts; complements canvas role="img")
+    sr_severity = _sr_chart_table(
+        "desc-chartSeverityPie",
+        "Findings by severity (same data as the pie chart)",
+        "<tr><th>Severity</th><th>Count</th></tr>",
+        (
+            "".join(
+                f"<tr><td>{html_lib.escape(str(r['severity']))}</td><td>{r['count']}</td></tr>"
+                for r in findings_by_severity
+            )
+            or "<tr><td colspan=\"2\">No data for this period</td></tr>"
+        ),
+    )
+
+    sr_posts_ot = _sr_chart_table(
+        "desc-chartPostsOverTime",
+        "Posts per day (same data as the line chart)",
+        "<tr><th>Date</th><th>Posts</th></tr>",
+        (
+            "".join(
+                f"<tr><td>{html_lib.escape(str(r['date']))}</td><td>{r['count']}</td></tr>" for r in posts_per_day
+            )
+            or "<tr><td colspan=\"2\">No data for this period</td></tr>"
+        ),
+    )
+
+    sr_findings_ot = _sr_chart_table(
+        "desc-chartFindingsOverTime",
+        "Findings per day (same data as the line chart)",
+        "<tr><th>Date</th><th>Findings</th></tr>",
+        (
+            "".join(
+                f"<tr><td>{html_lib.escape(str(r['date']))}</td><td>{r['count']}</td></tr>"
+                for r in findings_per_day
+            )
+            or "<tr><td colspan=\"2\">No data for this period</td></tr>"
+        ),
+    )
+
+    _beh = behavior_per_day[:_SR_MAX_BEHAVIOR_ROWS]
+    _beh_trunc = len(behavior_per_day) > _SR_MAX_BEHAVIOR_ROWS
+    _beh_cap = (
+        f"Behavior metrics by day and type (same data as the multi-line chart; "
+        f"showing first {_SR_MAX_BEHAVIOR_ROWS} rows"
+        + ("; more rows omitted." if _beh_trunc else ".")
+    )
+    sr_behavior_ot = _sr_chart_table(
+        "desc-chartBehaviorOverTime",
+        _beh_cap,
+        "<tr><th>Date</th><th>Metric type</th><th>Count</th></tr>",
+        (
+            "".join(
+                "<tr>"
+                f"<td>{html_lib.escape(str(r['date']))}</td>"
+                f"<td>{html_lib.escape(str(r['metric_type']))}</td>"
+                f"<td>{r['count']}</td>"
+                "</tr>"
+                for r in _beh
+            )
+            or "<tr><td colspan=\"3\">No data for this period</td></tr>"
+        ),
+    )
+
+    sr_findings_rule = _sr_chart_table(
+        "desc-chartFindingsByRule",
+        "Findings by rule (same data as the bar chart)",
+        "<tr><th>rule_id</th><th>severity</th><th>count</th></tr>",
+        (
+            "".join(
+                "<tr>"
+                f"<td>{html_lib.escape(str(r['rule_id']))}</td>"
+                f"<td>{html_lib.escape(str(r['severity']))}</td>"
+                f"<td>{r['count']}</td>"
+                "</tr>"
+                for r in findings_by_rule
+            )
+            or "<tr><td colspan=\"3\">No data for this period</td></tr>"
+        ),
+    )
+
+    sr_comments_pp = _sr_chart_table(
+        "desc-chartCommentsPerPost",
+        "Comments per post, top sample (same data as the bar chart)",
+        "<tr><th>post_id</th><th>comments</th></tr>",
+        (
+            "".join(
+                f"<tr><td>{html_lib.escape(str(r['post_id']))}</td><td>{r['count']}</td></tr>"
+                for r in comments_per_post
+            )
+            or "<tr><td colspan=\"2\">No data for this period</td></tr>"
+        ),
+    )
+
+    sr_net = _sr_network_block(
+        "desc-networkGraph",
+        "Agent–submolt network: nodes are agents and submolts; edge values are post counts between pairs.",
+        network_nodes,
+        network_edges,
+    )
+
+    sr_net_c = _sr_network_block(
+        "desc-networkCommentGraph",
+        "Comment-thread sample network: post and comment nodes; edges show reply or post attachment.",
+        network_comment_nodes,
+        network_comment_edges,
+    )
+
+    sr_wc_m = _sr_chart_table(
+        "desc-wordcloudMolts",
+        "Word frequencies for molts (posts and comments), same weights as the word cloud",
+        "<tr><th>Word</th><th>Weight</th></tr>",
+        (
+            "".join(f"<tr><td>{html_lib.escape(str(w))}</td><td>{c}</td></tr>" for w, c in word_freq_molts)
+            or "<tr><td colspan=\"2\">No data for this period</td></tr>"
+        ),
+    )
+
+    sr_wc_s = _sr_chart_table(
+        "desc-wordcloudSubmolts",
+        "Word frequencies for submolt names and descriptions, same weights as the word cloud",
+        "<tr><th>Word</th><th>Weight</th></tr>",
+        (
+            "".join(f"<tr><td>{html_lib.escape(str(w))}</td><td>{c}</td></tr>" for w, c in word_freq_submolts)
+            or "<tr><td colspan=\"2\">No data for this period</td></tr>"
+        ),
+    )
+
     html_document = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -528,8 +709,70 @@ footer.dashboard-footer code {{
   color: var(--color-accent-warm);
 }}
 .visually-hidden {{ position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }}
+/* SR-only chart/network data tables — off-screen, not display:none (AT can navigate tables) */
+.sr-only-chart-block,
+table.sr-chart-table {{
+  position: absolute;
+  left: -10000px;
+  top: auto;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  margin: 0;
+}}
+.network-region {{
+  outline: none;
+}}
+.network-region:focus-visible {{
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-md);
+}}
 @media (max-width: 720px) {{
   main#main-content.dashboard-main {{ padding: var(--space-md) var(--space-sm); }}
+}}
+/* MW-6: print — light paper, tables/charts avoid awkward splits; SR data tables visible on paper */
+@media print {{
+  * {{ animation: none !important; }}
+  body.dashboard-body {{
+    background: #fff !important;
+    color: #000 !important;
+    background-image: none !important;
+  }}
+  main#main-content.dashboard-main {{
+    max-width: none;
+    padding: 0.35rem 0.5rem;
+  }}
+  h1, h2, h3 {{ color: #000 !important; }}
+  table.data-table {{
+    box-shadow: none;
+    border: 1px solid #999;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }}
+  .sr-only-chart-block,
+  table.sr-chart-table {{
+    position: static !important;
+    left: auto !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    margin: 0.5rem 0 !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }}
+  canvas[role="img"],
+  .network-panel {{
+    break-inside: avoid;
+    page-break-inside: avoid;
+    max-width: 100%;
+  }}
+  .network-region:focus-visible {{ outline: none !important; }}
+  footer.dashboard-footer {{
+    background: #fff !important;
+    border-top: 1px solid #ccc;
+    color: #333 !important;
+  }}
 }}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -570,48 +813,62 @@ footer.dashboard-footer code {{
 {_captioned_table("Grounded vs rhetoric: trend (findings per day)", "<tr><th>date</th><th>grounded</th><th>rhetoric</th></tr>", grounded_trend_rows)}
 
 <h2>Findings by severity (pie)</h2>
-<canvas id="chartSeverityPie" width="300" height="200" role="img" aria-label="Chart: findings by severity (pie)"></canvas>
+{sr_severity}
+<canvas id="chartSeverityPie" width="300" height="200" role="img" aria-label="Chart: findings by severity (pie)" aria-describedby="desc-chartSeverityPie"></canvas>
 <p id="emptySeverityPie" class="empty-state" style="display:none">No data for this period</p>
 
 <h2>Posts over time (daily)</h2>
-<canvas id="chartPostsOverTime" width="400" height="150" role="img" aria-label="Chart: posts over time (daily)"></canvas>
+{sr_posts_ot}
+<canvas id="chartPostsOverTime" width="400" height="150" role="img" aria-label="Chart: posts over time (daily)" aria-describedby="desc-chartPostsOverTime"></canvas>
 <p id="emptyPostsOverTime" class="empty-state" style="display:none">No data for this period</p>
 
 <h2>Findings over time (daily)</h2>
-<canvas id="chartFindingsOverTime" width="400" height="150" role="img" aria-label="Chart: findings over time (daily)"></canvas>
+{sr_findings_ot}
+<canvas id="chartFindingsOverTime" width="400" height="150" role="img" aria-label="Chart: findings over time (daily)" aria-describedby="desc-chartFindingsOverTime"></canvas>
 <p id="emptyFindingsOverTime" class="empty-state" style="display:none">No data for this period</p>
 
 <h2>Behavior metrics over time (daily)</h2>
-<canvas id="chartBehaviorOverTime" width="400" height="150" role="img" aria-label="Chart: behavior metrics over time (daily)"></canvas>
+{sr_behavior_ot}
+<canvas id="chartBehaviorOverTime" width="400" height="150" role="img" aria-label="Chart: behavior metrics over time (daily)" aria-describedby="desc-chartBehaviorOverTime"></canvas>
 <p id="emptyBehaviorOverTime" class="empty-state" style="display:none">No data for this period</p>
 
 <h2>Findings by rule (bar)</h2>
-<canvas id="chartFindingsByRule" width="400" height="200" role="img" aria-label="Chart: findings by rule (bar)"></canvas>
+{sr_findings_rule}
+<canvas id="chartFindingsByRule" width="400" height="200" role="img" aria-label="Chart: findings by rule (bar)" aria-describedby="desc-chartFindingsByRule"></canvas>
 <p id="emptyFindingsByRule" class="empty-state" style="display:none">No data for this period</p>
 
 <h2>Comments per post (top 10)</h2>
-<canvas id="chartCommentsPerPost" width="400" height="200" role="img" aria-label="Chart: comments per post (top 10)"></canvas>
+{sr_comments_pp}
+<canvas id="chartCommentsPerPost" width="400" height="200" role="img" aria-label="Chart: comments per post (top 10)" aria-describedby="desc-chartCommentsPerPost"></canvas>
 <p id="emptyCommentsPerPost" class="empty-state" style="display:none">No data for this period</p>
 
 <h2>Agent activity heatmap (last 14 days)</h2>
 <table class="data-table" border="0"><caption class="visually-hidden">{html_lib.escape("Agent activity heatmap (last 14 days)")}</caption><thead><tr><th>Agent</th>{heatmap_header}</tr></thead><tbody>{heatmap_rows_html}</tbody></table>
 
-<h2>Network: Agent–Submolt</h2>
-<p class="visually-hidden">Interactive network visualization: agents connected to submolts by post volume.</p>
-<div id="networkGraph" class="network-panel" aria-label="Agent and submolt network graph"></div>
+<h2 id="heading-network-agent-submolt">Network: Agent–Submolt</h2>
+<div class="network-region" role="region" aria-labelledby="heading-network-agent-submolt" tabindex="0">
+{sr_net}
+<p id="networkGraph-keyboard-hint" class="visually-hidden">Interactive graph: use the mouse or touch to pan and zoom. Keyboard graph navigation is limited; use the data tables above for full node and edge lists.</p>
+<div id="networkGraph" class="network-panel" role="group" aria-label="Agent and submolt network graph" aria-describedby="desc-networkGraph networkGraph-keyboard-hint"></div>
 <p id="emptyNetwork" class="empty-state" style="display:none">No data for this period</p>
+</div>
 
-<h2>Comment threads (sample)</h2>
-<p class="visually-hidden">Interactive network visualization: comment threads between posts and comments.</p>
-<div id="networkCommentGraph" class="network-panel" aria-label="Comment thread network graph"></div>
+<h2 id="heading-comment-threads">Comment threads (sample)</h2>
+<div class="network-region" role="region" aria-labelledby="heading-comment-threads" tabindex="0">
+{sr_net_c}
+<p id="networkCommentGraph-keyboard-hint" class="visually-hidden">Interactive graph: use the mouse or touch to pan and zoom. Keyboard graph navigation is limited; use the data tables above for full node and edge lists.</p>
+<div id="networkCommentGraph" class="network-panel" role="group" aria-label="Comment thread network graph" aria-describedby="desc-networkCommentGraph networkCommentGraph-keyboard-hint"></div>
 <p id="emptyNetworkComment" class="empty-state" style="display:none">No data for this period</p>
+</div>
 
 <h2>Word cloud: Molts (posts &amp; comments)</h2>
-<canvas id="wordcloudMolts" width="700" height="350" role="img" aria-label="Word cloud: frequent words in molts (posts and comments)"></canvas>
+{sr_wc_m}
+<canvas id="wordcloudMolts" width="700" height="350" role="img" aria-label="Word cloud: frequent words in molts (posts and comments)" aria-describedby="desc-wordcloudMolts"></canvas>
 <p id="emptyWordcloudMolts" class="empty-state" style="display:none">No text data for this period</p>
 
 <h2>Word cloud: Submolts (names &amp; descriptions)</h2>
-<canvas id="wordcloudSubmolts" width="700" height="300" role="img" aria-label="Word cloud: submolt names and descriptions"></canvas>
+{sr_wc_s}
+<canvas id="wordcloudSubmolts" width="700" height="300" role="img" aria-label="Word cloud: submolt names and descriptions" aria-describedby="desc-wordcloudSubmolts"></canvas>
 <p id="emptyWordcloudSubmolts" class="empty-state" style="display:none">No submolt data for this period</p>
 </main>
 
@@ -787,7 +1044,7 @@ footer.dashboard-footer code {{
 }})();
 </script>
 <footer class="dashboard-footer">
-<p>Export network data: run <code>python scripts/export_network.py</code>; see <code>docs/TELEMETRY_AND_NETWORK_VIZ.md</code> for Gephi, NodeXL, Cytoscape, etc.</p>
+<p>Bulk / offline network data: run <code>python scripts/export_network.py</code> from the repo (writes <code>exports/network_edges.csv</code> and <code>exports/network.graphml</code> beside your DB). See <code>docs/TELEMETRY_AND_NETWORK_VIZ.md</code> for Gephi, NodeXL, Cytoscape, and other tools.</p>
 </footer>
 </body>
 </html>
