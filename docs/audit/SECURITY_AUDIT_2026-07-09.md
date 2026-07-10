@@ -17,7 +17,7 @@ Moltbook Watchtower is a **read-only, local-first** Python monitor with a delibe
 
 | Check | Result |
 |-------|--------|
-| `pytest tests/ -v --tb=short` | **PASS** — 59 passed in 11.59s |
+| `pytest tests/ -v --tb=short` | **PASS** — 60 passed (includes SEC-1 `test_dashboard_escape.py`) |
 | `gitleaks detect --no-git` | **PASS** — no leaks found |
 | `pip-audit -r requirements.txt` | **WARN** — pytest 8.4.2 → PYSEC-2026-1845 (fix 9.0.3); dev-only dep |
 
@@ -27,8 +27,8 @@ Moltbook Watchtower is a **read-only, local-first** Python monitor with a delibe
 
 | Severity | Location | Finding |
 |----------|----------|---------|
-| Medium | `scripts/generate_dashboard_html.py:406-418` | Several summary tables (`recent_rows`, `rows_html`, `submolt_rows`, `top_agents_posts_rows`) embed DB values without `html.escape()`. If `exports/dashboard.html` is opened on a shared host or sent to another user, malicious agent names / submolt names / snippets could cause stored XSS. SR tables and network tables **do** escape (lines 68-78, 447-562). |
-| Medium | `scripts/generate_dashboard_html.py:397-402` | Heatmap `title` attribute and agent cell text use unescaped `agent` from DB (`title="{agent} {d}: {cnt}"`, `<td>{agent[:20]}</td>`). |
+| Medium | `scripts/generate_dashboard_html.py:406-418` | ~~Several summary tables embed DB values without `html.escape()`~~ **Fixed** in PR `fix/sec-1-dashboard-escape` (`_cell()` helper; `tests/unit/test_dashboard_escape.py`). |
+| Medium | `scripts/generate_dashboard_html.py:397-402` | ~~Heatmap unescaped agent~~ **Fixed** same PR. |
 | Medium | `scripts/generate_dashboard_html.py:332-342` | Word clouds tokenize **raw post/submolt text** from DB; tokens may include credential fragments not caught by leak rules. Policy says open dashboard locally only — document and consider filtering tokens against leak patterns. |
 | Medium | `data/watchtower.db` (operational) | DB stores full post/comment bodies including third-party secrets. Filesystem permissions and backup encryption are operator responsibility (`docs/SECURITY.md` L16-17, L34). |
 | Low | `.gitleaks.toml:6` | Allowlist excludes all `*.md` files from secret scanning — pasted keys in docs would not be caught. |
@@ -51,7 +51,7 @@ Moltbook Watchtower is a **read-only, local-first** Python monitor with a delibe
 
 | ID | Item | Rationale |
 |----|------|-----------|
-| SEC-1 | Apply `html.escape()` to all DB-sourced cells in `generate_dashboard_html.py` (lines 406-418, 397-402) | Close stored XSS if dashboard leaves single-operator machine |
+| SEC-1 | ~~Apply `html.escape()`~~ **Fixed** — branch `fix/sec-1-dashboard-escape`; 60 tests pass with `test_dashboard_escape.py` | Closed stored XSS in summary tables and heatmap |
 | SEC-2 | Add SRI or vendor pinned local copies for CDN scripts | Reduce supply-chain risk |
 | SEC-3 | Add Dependabot + `pip-audit` CI job (or pin pytest ≥9.0.3) | Close dependency hygiene gap |
 

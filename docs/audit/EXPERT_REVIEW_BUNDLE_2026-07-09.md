@@ -13,7 +13,7 @@
 
 Moltbook Watchtower is a **read-only, local-first** Python monitor for the Moltbook agent network. It collects posts/comments via a rate-limited GET client, runs leak/injection/behavior/linguistic analyzers over SQLite, and emits a **static HTML dashboard** plus optional markdown reports. No writes to the Moltbook network.
 
-This audit confirms **59/59 tests pass**, **gitleaks clean**, and **MW-1–7 GUI waves closed**. Residual gaps: dashboard HTML escaping inconsistencies (SEC-1), missing CI dependency/a11y automation, and CDN supply chain for chart libraries. A2UI catalog conventions **do not apply** to the current static generator.
+This audit confirms **60/60 tests pass** (post-SEC-1), **gitleaks clean**, and **MW-1–7 GUI waves closed**. **SEC-1** (dashboard HTML escaping) is remediated on branch `fix/sec-1-dashboard-escape`. Residual gaps: missing CI dependency/a11y automation and CDN supply chain for chart libraries. A2UI catalog conventions **do not apply** to the current static generator.
 
 ---
 
@@ -21,7 +21,7 @@ This audit confirms **59/59 tests pass**, **gitleaks clean**, and **MW-1–7 GUI
 
 | Command | Result | Notes |
 |---------|--------|-------|
-| `python -m pytest tests/ -v --tb=short` | **PASS** | 59 passed in 11.59s (2026-07-09) |
+| `python -m pytest tests/ -v --tb=short` | **PASS** | 60 passed (includes SEC-1 escape test) |
 | `gitleaks detect --source . --config .gitleaks.toml --no-git` | **PASS** | No leaks found |
 | `pip-audit -r requirements.txt` | **WARN** | pytest 8.4.2 → PYSEC-2026-1845 (fix 9.0.3); dev-only |
 | `.github/workflows/tests.yml` | **Aligned** | Same pytest + Playwright chromium as local |
@@ -35,8 +35,7 @@ This audit confirms **59/59 tests pass**, **gitleaks clean**, and **MW-1–7 GUI
 
 | Severity | Location | Finding |
 |----------|----------|---------|
-| Medium | `generate_dashboard_html.py:406-418` | Unescaped DB values in summary tables (stored XSS if dashboard shared) |
-| Medium | `generate_dashboard_html.py:397-402` | Unescaped agent names in heatmap |
+| Medium | `generate_dashboard_html.py` | ~~Unescaped DB cells~~ **Fixed** — SEC-1 PR `fix/sec-1-dashboard-escape` |
 | Medium | `generate_dashboard_html.py:332-342` | Word clouds from raw post text may surface credential fragments |
 | Medium | `data/watchtower.db` | Sensitive third-party content at rest — operator permissions required |
 | Low | `.gitleaks.toml:6` | All `*.md` excluded from secret scan |
@@ -49,7 +48,7 @@ This audit confirms **59/59 tests pass**, **gitleaks clean**, and **MW-1–7 GUI
 
 | Tier | Items |
 |------|-------|
-| **Block** (before shared hosting) | SEC-1: `html.escape()` on all DB-sourced dashboard cells |
+| **Block** (before shared hosting) | ~~SEC-1~~ **Fixed** on `fix/sec-1-dashboard-escape` — merge before public hosting |
 | **Warn** (human review) | CDN SRI or vendoring; pip-audit CI; pytest pin |
 | **Backlog** | CodeQL; gitleaks `.md` tuning; DB encryption v2 |
 
