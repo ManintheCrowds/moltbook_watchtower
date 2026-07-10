@@ -32,6 +32,11 @@ def _captioned_table(caption: str, thead_tr: str, tbody_html: str) -> str:
     )
 
 
+def _cell(value) -> str:
+    """Escape DB-sourced text for HTML table cells and attributes (SEC-1)."""
+    return html_lib.escape(str(value) if value is not None else "")
+
+
 def _tokenize_word_freq(texts: list[str], top_n: int = 80) -> list[list]:
     """Build [word, count] list for wordcloud2 from concatenated text; exclude stopwords."""
     combined = " ".join((t or "").lower() for t in texts)
@@ -394,46 +399,52 @@ def main() -> None:
         cnt = agent_counts_by_day.get((agent, d), 0)
         pct = (cnt / heatmap_max * 100) if heatmap_max else 0
         bg = f"rgba(75, 192, 192, {0.2 + 0.8 * pct / 100:.2f})"
-        return f'<td style="background-color:{bg}" title="{agent} {d}: {cnt}">{cnt}</td>'
-    heatmap_header = "".join(f"<th>{d[5:]}</th>" for d in dates_14)
+        title = f"{agent} {d}: {cnt}"
+        return f'<td style="background-color:{bg}" title="{_cell(title)}">{cnt}</td>'
+    heatmap_header = "".join(f"<th>{_cell(d[5:])}</th>" for d in dates_14)
     heatmap_rows_html = ""
     for agent in top_agents_heatmap:
         cells = "".join(_heatmap_cell(agent, d) for d in dates_14)
-        heatmap_rows_html += f"<tr><td>{agent[:20]}</td>{cells}</tr>"
+        heatmap_rows_html += f"<tr><td>{_cell(agent[:20])}</td>{cells}</tr>"
     if not top_agents_heatmap:
         heatmap_rows_html = "<tr><td colspan='15'>No data for this period</td></tr>"
 
     rows_html = "".join(
-        f"<tr><td>{r['rule_id']}</td><td>{r['severity']}</td><td>{r['count']}</td></tr>"
+        f"<tr><td>{_cell(r['rule_id'])}</td><td>{_cell(r['severity'])}</td><td>{r['count']}</td></tr>"
         for r in findings_by_rule
     ) or "<tr><td colspan='3'>No data for this period</td></tr>"
     recent_rows = "".join(
-        f"<tr><td>{r['post_id']}</td><td>{r['comment_id'] or ''}</td><td>{r['rule_id']}</td><td>{r['severity']}</td><td>{r['redacted_snippet'][:80]!s}</td><td>{r['created_at']}</td></tr>"
+        f"<tr><td>{_cell(r['post_id'])}</td><td>{_cell(r['comment_id'] or '')}</td>"
+        f"<td>{_cell(r['rule_id'])}</td><td>{_cell(r['severity'])}</td>"
+        f"<td>{_cell(r['redacted_snippet'][:80])}</td><td>{_cell(r['created_at'])}</td></tr>"
         for r in recent_findings
     ) or "<tr><td colspan='6'>No data for this period</td></tr>"
     submolt_rows = "".join(
-        f"<tr><td>{r['submolt']}</td><td>{r['count']}</td></tr>" for r in submolts_by_posts
+        f"<tr><td>{_cell(r['submolt'])}</td><td>{r['count']}</td></tr>" for r in submolts_by_posts
     ) or "<tr><td colspan='2'>No data for this period</td></tr>"
     top_agents_posts_rows = "".join(
-        f"<tr><td>{r['agent_name']}</td><td>{r['count']}</td></tr>" for r in top_agents_by_posts
+        f"<tr><td>{_cell(r['agent_name'])}</td><td>{r['count']}</td></tr>" for r in top_agents_by_posts
     ) or "<tr><td colspan='2'>No data for this period</td></tr>"
     top_agents_comments_rows = "".join(
-        f"<tr><td>{r['agent_name']}</td><td>{r['count']}</td></tr>" for r in top_agents_by_comments
+        f"<tr><td>{_cell(r['agent_name'])}</td><td>{r['count']}</td></tr>" for r in top_agents_by_comments
     ) or "<tr><td colspan='2'>No data for this period</td></tr>"
     behavior_rows = "".join(
-        f"<tr><td>{r['metric_type']}</td><td>{r['key_name']}</td><td>{r['value_int']}</td><td>{r['created_at']}</td></tr>"
+        f"<tr><td>{_cell(r['metric_type'])}</td><td>{_cell(r['key_name'])}</td>"
+        f"<td>{r['value_int']}</td><td>{_cell(r['created_at'])}</td></tr>"
         for r in recent_behavior_metrics
     ) or "<tr><td colspan='4'>No data for this period</td></tr>"
     agent_grounded_rows = "".join(
-        f"<tr><td>{r['agent_name']}</td><td>{r['grounded_items']}</td><td>{r['rhetoric_items']}</td><td>{r['grounded_items'] + r['rhetoric_items']}</td></tr>"
+        f"<tr><td>{_cell(r['agent_name'])}</td><td>{r['grounded_items']}</td>"
+        f"<td>{r['rhetoric_items']}</td><td>{r['grounded_items'] + r['rhetoric_items']}</td></tr>"
         for r in agent_grounded_ratios
     ) or "<tr><td colspan='4'>No data</td></tr>"
     submolt_grounded_rows = "".join(
-        f"<tr><td>{r['submolt']}</td><td>{r['grounded_items']}</td><td>{r['rhetoric_items']}</td><td>{r['grounded_items'] + r['rhetoric_items']}</td></tr>"
+        f"<tr><td>{_cell(r['submolt'])}</td><td>{r['grounded_items']}</td>"
+        f"<td>{r['rhetoric_items']}</td><td>{r['grounded_items'] + r['rhetoric_items']}</td></tr>"
         for r in submolt_grounded_ratios
     ) or "<tr><td colspan='4'>No data</td></tr>"
     grounded_trend_rows = "".join(
-        f"<tr><td>{r['date']}</td><td>{r['grounded']}</td><td>{r['rhetoric']}</td></tr>"
+        f"<tr><td>{_cell(r['date'])}</td><td>{r['grounded']}</td><td>{r['rhetoric']}</td></tr>"
         for r in grounded_trend
     ) or "<tr><td colspan='3'>No data</td></tr>"
 
