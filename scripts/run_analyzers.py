@@ -19,7 +19,7 @@ from src.analyzers import (
     Finding,
 )
 from src.scheduler.audit import audit_log
-from src.storage import get_connection, StorageWriter
+from src.storage import get_connection, init_db, StorageWriter
 
 
 def write_alerts_file(settings, findings: list[Finding], analyzer_name: str) -> None:
@@ -39,6 +39,7 @@ def main() -> None:
     inj_findings: list[Finding] = []
     behavior_findings: list[Finding] = []
     linguistic_findings: list[Finding] = []
+    init_db(settings.db_path)  # idempotent; creates schema on a fresh clone
     conn = get_connection(settings.db_path)
     cur = conn.cursor()
     try:
