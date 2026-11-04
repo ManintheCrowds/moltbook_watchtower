@@ -381,7 +381,7 @@ def main() -> None:
         "agent_heatmap": {
             "dates": dates_14,
             "agents": top_agents_heatmap,
-            "cells": agent_counts_by_day,
+            "cells": {f"{a}|{d}": c for (a, d), c in agent_counts_by_day.items()},  # JSON object keys must be strings
             "max": heatmap_max,
         },
         "network_comment_nodes": network_comment_nodes,

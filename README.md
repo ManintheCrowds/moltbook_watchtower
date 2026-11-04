@@ -77,7 +77,7 @@ python scripts/run_analyzers.py
 
 # Generate dashboard
 python scripts/generate_dashboard_html.py
-# Open exports/dashboard.html in browser
+# Open <DATA_DIR>/exports/dashboard.html in browser (default: data/exports/dashboard.html)
 ```
 
 See [docs/SETUP.md](docs/SETUP.md) for API key registration and full go-live steps.
@@ -103,7 +103,7 @@ python -m pytest tests/ -v --tb=short
 
 Dashboard GUI smoke only: `python -m pytest tests/e2e/ -m e2e -v` (see [docs/audit/gui-2026-03-26.md](docs/audit/gui-2026-03-26.md)).
 
-Unit, integration, and Playwright e2e tests (59 total including one browser smoke test).
+Unit, integration, and Playwright e2e tests (62 total including one browser smoke test).
 
 ## License
 
