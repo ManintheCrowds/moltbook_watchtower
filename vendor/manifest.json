@@ -1,0 +1,119 @@
+{
+  "_comment": "Vendored browser libraries and fonts inlined into exports/dashboard.html by scripts/generate_dashboard_html.py. sha256 is verified at generation time and in tests/unit/test_vendor_libs.py. Libraries are inlined as <script> in this order; fonts are inlined as @font-face (base64 woff2).",
+  "libraries": [
+    {
+      "name": "chart.js",
+      "version": "4.6.1",
+      "license": "MIT",
+      "homepage": "https://www.chartjs.org",
+      "source_url": "https://registry.npmjs.org/chart.js/-/chart.js-4.6.1.tgz",
+      "previous_cdn_url": "https://cdn.jsdelivr.net/npm/chart.js",
+      "script": "chart.js-4.6.1/chart.umd.min.js",
+      "files": {
+        "chart.js-4.6.1/chart.umd.min.js": "87364cc2b2a76a6684929e7d6b80b18a897794db38400caff1fcf1791c6925d2",
+        "chart.js-4.6.1/LICENSE.md": "41a84aa2caba645f966a18d9c2056b73e6d3a81d80bc0046bc0011a2634d4cce"
+      }
+    },
+    {
+      "name": "vis-network",
+      "version": "10.1.5",
+      "license": "Apache-2.0 OR MIT",
+      "homepage": "https://visjs.github.io/vis-network/",
+      "source_url": "https://registry.npmjs.org/vis-network/-/vis-network-10.1.5.tgz",
+      "previous_cdn_url": "https://unpkg.com/vis-network/standalone/umd/vis-network.min.js",
+      "script": "vis-network-10.1.5/vis-network.min.js",
+      "files": {
+        "vis-network-10.1.5/vis-network.min.js": "b427322ad953d70ab75d1b798ebb8349863502f244e02de3e12a4ab7dfeddf2c",
+        "vis-network-10.1.5/LICENSE-MIT": "1f65085e54c036645082257618db2c7b787e68c3b02485e214ecd09e0834ee8f",
+        "vis-network-10.1.5/LICENSE-APACHE-2.0": "1509904280a272780fd69c04b858f512cf216f8e3464a0dd98d8f34416feced9"
+      }
+    },
+    {
+      "name": "wordcloud2.js",
+      "version": "1.0.2",
+      "license": "MIT",
+      "homepage": "https://github.com/timdream/wordcloud2.js",
+      "source_url": "https://cdnjs.cloudflare.com/ajax/libs/wordcloud2.js/1.0.2/wordcloud2.min.js",
+      "license_source_url": "https://registry.npmjs.org/wordcloud/-/wordcloud-1.0.2.tgz",
+      "previous_cdn_url": "https://cdnjs.cloudflare.com/ajax/libs/wordcloud2.js/1.0.2/wordcloud2.min.js",
+      "script": "wordcloud2.js-1.0.2/wordcloud2.min.js",
+      "files": {
+        "wordcloud2.js-1.0.2/wordcloud2.min.js": "0c7ab43960b7422c17fe0a4fdea21de01ca0c3ea1202154d03834785e66df1b1",
+        "wordcloud2.js-1.0.2/LICENSE": "6084778d56c6807dcb079e111a6322aca2703af29ea4c34eaf01d85ec82a9d7a"
+      }
+    }
+  ],
+  "fonts": [
+    {
+      "name": "JetBrains Mono",
+      "family": "JetBrains Mono",
+      "version": "2.304",
+      "license": "OFL-1.1",
+      "homepage": "https://www.jetbrains.com/lp/mono/",
+      "source_url": "https://github.com/JetBrains/JetBrainsMono/releases/download/v2.304/JetBrainsMono-2.304.zip",
+      "previous_cdn_url": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&display=swap",
+      "faces": [
+        {
+          "file": "jetbrains-mono-2.304/JetBrainsMono-Medium.woff2",
+          "weight": 500,
+          "style": "normal",
+          "source_path": "fonts/webfonts/JetBrainsMono-Medium.woff2"
+        },
+        {
+          "file": "jetbrains-mono-2.304/JetBrainsMono-SemiBold.woff2",
+          "weight": 600,
+          "style": "normal",
+          "source_path": "fonts/webfonts/JetBrainsMono-SemiBold.woff2"
+        },
+        {
+          "file": "jetbrains-mono-2.304/JetBrainsMono-Bold.woff2",
+          "weight": 700,
+          "style": "normal",
+          "source_path": "fonts/webfonts/JetBrainsMono-Bold.woff2"
+        }
+      ],
+      "files": {
+        "jetbrains-mono-2.304/JetBrainsMono-Medium.woff2": "086c48dfbea9ddaff1320f7e09399b8e2924e88ce67453721255db3bdbb5a353",
+        "jetbrains-mono-2.304/JetBrainsMono-SemiBold.woff2": "918edad542a1da608fd2ba8daebaff9ac802309103fe760eed465b8b4e47faf1",
+        "jetbrains-mono-2.304/JetBrainsMono-Bold.woff2": "c503cc5ec5f8b2c7666b7ecda1adf44bd45f2e6579b2eba0fc292150416588a2",
+        "jetbrains-mono-2.304/OFL.txt": "30f0c136e3c88e422d0791acd97238870f9054a9729bc34cf2ff0d4ed8cac4ad"
+      }
+    },
+    {
+      "name": "Source Sans 3",
+      "family": "Source Sans 3",
+      "version": "3.052",
+      "license": "OFL-1.1",
+      "homepage": "https://adobe-fonts.github.io/source-sans/",
+      "source_url": "https://github.com/adobe-fonts/source-sans/releases/download/3.052R/WOFF2-source-sans-3.052R.zip",
+      "license_source_url": "https://raw.githubusercontent.com/adobe-fonts/source-sans/3.052R/LICENSE.md",
+      "previous_cdn_url": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&display=swap",
+      "faces": [
+        {
+          "file": "source-sans-3.052/SourceSans3-Regular.woff2",
+          "weight": 400,
+          "style": "normal",
+          "source_path": "WOFF2/TTF/SourceSans3-Regular.ttf.woff2"
+        },
+        {
+          "file": "source-sans-3.052/SourceSans3-Semibold.woff2",
+          "weight": 600,
+          "style": "normal",
+          "source_path": "WOFF2/TTF/SourceSans3-Semibold.ttf.woff2"
+        },
+        {
+          "file": "source-sans-3.052/SourceSans3-It.woff2",
+          "weight": 400,
+          "style": "italic",
+          "source_path": "WOFF2/TTF/SourceSans3-It.ttf.woff2"
+        }
+      ],
+      "files": {
+        "source-sans-3.052/SourceSans3-Regular.woff2": "53492fb3a0def77354f166a55d09b63a10855e91c206c7620a81cf56e97f8ec3",
+        "source-sans-3.052/SourceSans3-Semibold.woff2": "47b9b661b9f395fe7f0d0e119637fba5c8dad97bde3df60066fd24229c0792f4",
+        "source-sans-3.052/SourceSans3-It.woff2": "4d80b3b801f4c457f1b4adbd3911d8501338e6d282141663770c38d3a2e97859",
+        "source-sans-3.052/LICENSE.md": "89ad2c4f66dd29127527493e729c31e731f111cf10faf5774c3db9275ed0c22c"
+      }
+    }
+  ]
+}

@@ -2,7 +2,12 @@
 # PURPOSE: Generate static HTML dashboard with tables and Chart.js graphs; no raw secrets.
 # DEPENDENCIES: config, src.storage
 # MODIFICATION NOTES: Embeds JSON in HTML for single-file portability; exports/dashboard.html (gitignored).
+#   Chart.js / vis-network / wordcloud2 and the JetBrains Mono / Source Sans 3 fonts are vendored
+#   under vendor/ (see vendor/README.md) and inlined after sha256 verification, so the dashboard
+#   works over file:// with no network (no CDN or Google Fonts requests).
 
+import base64
+import hashlib
 import html as html_lib
 import json
 import re
@@ -22,6 +27,78 @@ from src.storage import get_connection
 _STOPWORDS = frozenset(
     "the and for is to of in it you that he was on are with as his they at be this have from or one had by word but not what all were we when your can said there use each which she do how their if will up out many then them these so some her would make like into him time two more no go way could my than first been call who oil sit now find long down day did get come made may part".split()
 )
+
+
+VENDOR_DIR = repo_root / "vendor"
+VENDOR_MANIFEST = VENDOR_DIR / "manifest.json"
+
+
+def load_vendor_manifest() -> list[dict]:
+    """Return the vendored library entries (in inline order) from vendor/manifest.json."""
+    return json.loads(VENDOR_MANIFEST.read_text(encoding="utf-8"))["libraries"]
+
+
+def load_vendor_fonts() -> list[dict]:
+    """Return the vendored font entries from vendor/manifest.json."""
+    return json.loads(VENDOR_MANIFEST.read_text(encoding="utf-8"))["fonts"]
+
+
+def _vendor_script_tags() -> str:
+    """Inline vendored JS libraries after verifying sha256 against the manifest (fail closed)."""
+    tags = []
+    for lib in load_vendor_manifest():
+        rel = lib["script"]
+        data = (VENDOR_DIR / rel).read_bytes()
+        expected = lib["files"][rel]
+        actual = hashlib.sha256(data).hexdigest()
+        if actual != expected:
+            raise RuntimeError(
+                f"vendor/{rel} sha256 mismatch: expected {expected}, got {actual} (see vendor/README.md)"
+            )
+        js = data.decode("utf-8")
+        if "</script" in js.lower():
+            raise RuntimeError(f"vendor/{rel} contains '</script' and cannot be inlined safely")
+        tags.append(
+            f"<!-- {lib['name']} {lib['version']} ({lib['license']}) vendored from vendor/{rel} -->\n"
+            f"<script>{js}</script>"
+        )
+    return "\n".join(tags)
+
+
+def _vendor_font_face_css() -> str:
+    """Inline vendored woff2 fonts as @font-face after verifying sha256 (fail closed)."""
+    rules = []
+    for font in load_vendor_fonts():
+        for rel, expected in font["files"].items():
+            data = (VENDOR_DIR / rel).read_bytes()
+            actual = hashlib.sha256(data).hexdigest()
+            if actual != expected:
+                raise RuntimeError(
+                    f"vendor/{rel} sha256 mismatch: expected {expected}, got {actual} (see vendor/README.md)"
+                )
+        family = font["family"]
+        if '"' in family or "\n" in family or "</" in family.lower():
+            raise RuntimeError(f"vendor font family name is not safe to embed: {family!r}")
+        for face in font["faces"]:
+            rel = face["file"]
+            data = (VENDOR_DIR / rel).read_bytes()
+            b64 = base64.b64encode(data).decode("ascii")
+            weight = int(face["weight"])
+            style = face["style"]
+            if style not in {"normal", "italic", "oblique"}:
+                raise RuntimeError(f"vendor/{rel} has unsupported font-style {style!r}")
+            rules.append(
+                f"/* {font['name']} {font['version']} ({font['license']}) "
+                f"weight {weight} {style} vendored from vendor/{rel} */\n"
+                f"@font-face {{\n"
+                f"  font-family: \"{family}\";\n"
+                f"  font-style: {style};\n"
+                f"  font-weight: {weight};\n"
+                f"  font-display: swap;\n"
+                f"  src: url(data:font/woff2;base64,{b64}) format(\"woff2\");\n"
+                f"}}"
+            )
+    return "\n".join(rules)
 
 
 def _captioned_table(caption: str, thead_tr: str, tbody_html: str) -> str:
@@ -575,15 +652,16 @@ def main() -> None:
         ),
     )
 
+    vendor_scripts = _vendor_script_tags()
+    vendor_font_css = _vendor_font_face_css()
+
     html_document = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <title>Moltbook Watchtower</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700&amp;family=Source+Sans+3:ital,wght@0,400;0,600;1,400&amp;display=swap" rel="stylesheet">
 <style>
+{vendor_font_css}
 :root {{
   --font-sans: "Source Sans 3", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
@@ -806,9 +884,7 @@ table.sr-chart-table {{
   }}
 }}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/wordcloud2.js/1.0.2/wordcloud2.min.js"></script>
+{vendor_scripts}
 </head>
 <body class="dashboard-body">
 <main id="main-content" class="dashboard-main">
