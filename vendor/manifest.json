@@ -1,0 +1,46 @@
+{
+  "_comment": "Vendored browser libraries inlined into exports/dashboard.html by scripts/generate_dashboard_html.py. sha256 is verified at generation time and in tests/unit/test_vendor_libs.py. Order matters: scripts are inlined in this order.",
+  "libraries": [
+    {
+      "name": "chart.js",
+      "version": "4.6.1",
+      "license": "MIT",
+      "homepage": "https://www.chartjs.org",
+      "source_url": "https://registry.npmjs.org/chart.js/-/chart.js-4.6.1.tgz",
+      "previous_cdn_url": "https://cdn.jsdelivr.net/npm/chart.js",
+      "script": "chart.js-4.6.1/chart.umd.min.js",
+      "files": {
+        "chart.js-4.6.1/chart.umd.min.js": "87364cc2b2a76a6684929e7d6b80b18a897794db38400caff1fcf1791c6925d2",
+        "chart.js-4.6.1/LICENSE.md": "41a84aa2caba645f966a18d9c2056b73e6d3a81d80bc0046bc0011a2634d4cce"
+      }
+    },
+    {
+      "name": "vis-network",
+      "version": "10.1.5",
+      "license": "Apache-2.0 OR MIT",
+      "homepage": "https://visjs.github.io/vis-network/",
+      "source_url": "https://registry.npmjs.org/vis-network/-/vis-network-10.1.5.tgz",
+      "previous_cdn_url": "https://unpkg.com/vis-network/standalone/umd/vis-network.min.js",
+      "script": "vis-network-10.1.5/vis-network.min.js",
+      "files": {
+        "vis-network-10.1.5/vis-network.min.js": "b427322ad953d70ab75d1b798ebb8349863502f244e02de3e12a4ab7dfeddf2c",
+        "vis-network-10.1.5/LICENSE-MIT": "1f65085e54c036645082257618db2c7b787e68c3b02485e214ecd09e0834ee8f",
+        "vis-network-10.1.5/LICENSE-APACHE-2.0": "1509904280a272780fd69c04b858f512cf216f8e3464a0dd98d8f34416feced9"
+      }
+    },
+    {
+      "name": "wordcloud2.js",
+      "version": "1.0.2",
+      "license": "MIT",
+      "homepage": "https://github.com/timdream/wordcloud2.js",
+      "source_url": "https://cdnjs.cloudflare.com/ajax/libs/wordcloud2.js/1.0.2/wordcloud2.min.js",
+      "license_source_url": "https://registry.npmjs.org/wordcloud/-/wordcloud-1.0.2.tgz",
+      "previous_cdn_url": "https://cdnjs.cloudflare.com/ajax/libs/wordcloud2.js/1.0.2/wordcloud2.min.js",
+      "script": "wordcloud2.js-1.0.2/wordcloud2.min.js",
+      "files": {
+        "wordcloud2.js-1.0.2/wordcloud2.min.js": "0c7ab43960b7422c17fe0a4fdea21de01ca0c3ea1202154d03834785e66df1b1",
+        "wordcloud2.js-1.0.2/LICENSE": "6084778d56c6807dcb079e111a6322aca2703af29ea4c34eaf01d85ec82a9d7a"
+      }
+    }
+  ]
+}
