@@ -104,7 +104,7 @@ python -m pytest tests/ -v --tb=short
 
 Dashboard GUI smoke only: `python -m pytest tests/e2e/ -m e2e -v` (see [docs/audit/gui-2026-03-26.md](docs/audit/gui-2026-03-26.md)).
 
-Unit, integration, and Playwright e2e tests (73 total including two browser tests: a smoke test and an offline `file://` render test with all network requests blocked).
+Unit, integration, and Playwright e2e tests (80 total including two browser tests: a smoke test and an offline `file://` render test with all network requests blocked, including vendored font loading).
 
 Third-party browser libraries (versions, licenses, sha256): [vendor/README.md](vendor/README.md).
 

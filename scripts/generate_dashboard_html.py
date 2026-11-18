@@ -2,9 +2,11 @@
 # PURPOSE: Generate static HTML dashboard with tables and Chart.js graphs; no raw secrets.
 # DEPENDENCIES: config, src.storage
 # MODIFICATION NOTES: Embeds JSON in HTML for single-file portability; exports/dashboard.html (gitignored).
-#   Chart.js / vis-network / wordcloud2 are vendored under vendor/ (see vendor/README.md) and inlined
-#   after sha256 verification, so the dashboard works over file:// with no network (no CDN requests).
+#   Chart.js / vis-network / wordcloud2 and the JetBrains Mono / Source Sans 3 fonts are vendored
+#   under vendor/ (see vendor/README.md) and inlined after sha256 verification, so the dashboard
+#   works over file:// with no network (no CDN or Google Fonts requests).
 
+import base64
 import hashlib
 import html as html_lib
 import json
@@ -36,6 +38,11 @@ def load_vendor_manifest() -> list[dict]:
     return json.loads(VENDOR_MANIFEST.read_text(encoding="utf-8"))["libraries"]
 
 
+def load_vendor_fonts() -> list[dict]:
+    """Return the vendored font entries from vendor/manifest.json."""
+    return json.loads(VENDOR_MANIFEST.read_text(encoding="utf-8"))["fonts"]
+
+
 def _vendor_script_tags() -> str:
     """Inline vendored JS libraries after verifying sha256 against the manifest (fail closed)."""
     tags = []
@@ -56,6 +63,42 @@ def _vendor_script_tags() -> str:
             f"<script>{js}</script>"
         )
     return "\n".join(tags)
+
+
+def _vendor_font_face_css() -> str:
+    """Inline vendored woff2 fonts as @font-face after verifying sha256 (fail closed)."""
+    rules = []
+    for font in load_vendor_fonts():
+        for rel, expected in font["files"].items():
+            data = (VENDOR_DIR / rel).read_bytes()
+            actual = hashlib.sha256(data).hexdigest()
+            if actual != expected:
+                raise RuntimeError(
+                    f"vendor/{rel} sha256 mismatch: expected {expected}, got {actual} (see vendor/README.md)"
+                )
+        family = font["family"]
+        if '"' in family or "\n" in family or "</" in family.lower():
+            raise RuntimeError(f"vendor font family name is not safe to embed: {family!r}")
+        for face in font["faces"]:
+            rel = face["file"]
+            data = (VENDOR_DIR / rel).read_bytes()
+            b64 = base64.b64encode(data).decode("ascii")
+            weight = int(face["weight"])
+            style = face["style"]
+            if style not in {"normal", "italic", "oblique"}:
+                raise RuntimeError(f"vendor/{rel} has unsupported font-style {style!r}")
+            rules.append(
+                f"/* {font['name']} {font['version']} ({font['license']}) "
+                f"weight {weight} {style} vendored from vendor/{rel} */\n"
+                f"@font-face {{\n"
+                f"  font-family: \"{family}\";\n"
+                f"  font-style: {style};\n"
+                f"  font-weight: {weight};\n"
+                f"  font-display: swap;\n"
+                f"  src: url(data:font/woff2;base64,{b64}) format(\"woff2\");\n"
+                f"}}"
+            )
+    return "\n".join(rules)
 
 
 def _captioned_table(caption: str, thead_tr: str, tbody_html: str) -> str:
@@ -610,6 +653,7 @@ def main() -> None:
     )
 
     vendor_scripts = _vendor_script_tags()
+    vendor_font_css = _vendor_font_face_css()
 
     html_document = f"""<!DOCTYPE html>
 <html lang="en">
@@ -617,6 +661,7 @@ def main() -> None:
 <meta charset="utf-8">
 <title>Moltbook Watchtower</title>
 <style>
+{vendor_font_css}
 :root {{
   --font-sans: "Source Sans 3", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;

@@ -1,5 +1,5 @@
 {
-  "_comment": "Vendored browser libraries inlined into exports/dashboard.html by scripts/generate_dashboard_html.py. sha256 is verified at generation time and in tests/unit/test_vendor_libs.py. Order matters: scripts are inlined in this order.",
+  "_comment": "Vendored browser libraries and fonts inlined into exports/dashboard.html by scripts/generate_dashboard_html.py. sha256 is verified at generation time and in tests/unit/test_vendor_libs.py. Libraries are inlined as <script> in this order; fonts are inlined as @font-face (base64 woff2).",
   "libraries": [
     {
       "name": "chart.js",
@@ -40,6 +40,79 @@
       "files": {
         "wordcloud2.js-1.0.2/wordcloud2.min.js": "0c7ab43960b7422c17fe0a4fdea21de01ca0c3ea1202154d03834785e66df1b1",
         "wordcloud2.js-1.0.2/LICENSE": "6084778d56c6807dcb079e111a6322aca2703af29ea4c34eaf01d85ec82a9d7a"
+      }
+    }
+  ],
+  "fonts": [
+    {
+      "name": "JetBrains Mono",
+      "family": "JetBrains Mono",
+      "version": "2.304",
+      "license": "OFL-1.1",
+      "homepage": "https://www.jetbrains.com/lp/mono/",
+      "source_url": "https://github.com/JetBrains/JetBrainsMono/releases/download/v2.304/JetBrainsMono-2.304.zip",
+      "previous_cdn_url": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&display=swap",
+      "faces": [
+        {
+          "file": "jetbrains-mono-2.304/JetBrainsMono-Medium.woff2",
+          "weight": 500,
+          "style": "normal",
+          "source_path": "fonts/webfonts/JetBrainsMono-Medium.woff2"
+        },
+        {
+          "file": "jetbrains-mono-2.304/JetBrainsMono-SemiBold.woff2",
+          "weight": 600,
+          "style": "normal",
+          "source_path": "fonts/webfonts/JetBrainsMono-SemiBold.woff2"
+        },
+        {
+          "file": "jetbrains-mono-2.304/JetBrainsMono-Bold.woff2",
+          "weight": 700,
+          "style": "normal",
+          "source_path": "fonts/webfonts/JetBrainsMono-Bold.woff2"
+        }
+      ],
+      "files": {
+        "jetbrains-mono-2.304/JetBrainsMono-Medium.woff2": "086c48dfbea9ddaff1320f7e09399b8e2924e88ce67453721255db3bdbb5a353",
+        "jetbrains-mono-2.304/JetBrainsMono-SemiBold.woff2": "918edad542a1da608fd2ba8daebaff9ac802309103fe760eed465b8b4e47faf1",
+        "jetbrains-mono-2.304/JetBrainsMono-Bold.woff2": "c503cc5ec5f8b2c7666b7ecda1adf44bd45f2e6579b2eba0fc292150416588a2",
+        "jetbrains-mono-2.304/OFL.txt": "30f0c136e3c88e422d0791acd97238870f9054a9729bc34cf2ff0d4ed8cac4ad"
+      }
+    },
+    {
+      "name": "Source Sans 3",
+      "family": "Source Sans 3",
+      "version": "3.052",
+      "license": "OFL-1.1",
+      "homepage": "https://adobe-fonts.github.io/source-sans/",
+      "source_url": "https://github.com/adobe-fonts/source-sans/releases/download/3.052R/WOFF2-source-sans-3.052R.zip",
+      "license_source_url": "https://raw.githubusercontent.com/adobe-fonts/source-sans/3.052R/LICENSE.md",
+      "previous_cdn_url": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&display=swap",
+      "faces": [
+        {
+          "file": "source-sans-3.052/SourceSans3-Regular.woff2",
+          "weight": 400,
+          "style": "normal",
+          "source_path": "WOFF2/TTF/SourceSans3-Regular.ttf.woff2"
+        },
+        {
+          "file": "source-sans-3.052/SourceSans3-Semibold.woff2",
+          "weight": 600,
+          "style": "normal",
+          "source_path": "WOFF2/TTF/SourceSans3-Semibold.ttf.woff2"
+        },
+        {
+          "file": "source-sans-3.052/SourceSans3-It.woff2",
+          "weight": 400,
+          "style": "italic",
+          "source_path": "WOFF2/TTF/SourceSans3-It.ttf.woff2"
+        }
+      ],
+      "files": {
+        "source-sans-3.052/SourceSans3-Regular.woff2": "53492fb3a0def77354f166a55d09b63a10855e91c206c7620a81cf56e97f8ec3",
+        "source-sans-3.052/SourceSans3-Semibold.woff2": "47b9b661b9f395fe7f0d0e119637fba5c8dad97bde3df60066fd24229c0792f4",
+        "source-sans-3.052/SourceSans3-It.woff2": "4d80b3b801f4c457f1b4adbd3911d8501338e6d282141663770c38d3a2e97859",
+        "source-sans-3.052/LICENSE.md": "89ad2c4f66dd29127527493e729c31e731f111cf10faf5774c3db9275ed0c22c"
       }
     }
   ]
