@@ -4,7 +4,7 @@ This doc describes how Watchtower visualizes telemetry (tables, charts, in-dashb
 
 ## Current dashboard (tables + Chart.js)
 
-- **Script:** `scripts/generate_dashboard_html.py` → `exports/dashboard.html` (single static HTML).
+- **Script:** `scripts/generate_dashboard_html.py` → `<DATA_DIR>/exports/dashboard.html` (single static HTML).
 - **KPIs:** Total posts, comments, findings; last generated timestamp.
 - **Tables:** Findings by rule/severity, recent findings (50), top submolts by post count, top agents by posts, top agents by comments, recent behavior metrics.
 - **Charts (Chart.js):** Posts per day (line), findings per day (line), findings by rule (bar), comments per post top 10 (bar), severity pie, behavior over time.
@@ -17,9 +17,9 @@ The same dashboard includes an **agent–submolt** force-directed graph: agents 
 
 ## Export for external tools (Option B)
 
-- **Script:** `scripts/export_network.py` reads from the same SQLite DB and writes to `exports/` (gitignored):
-  - **Edge list CSV:** `exports/network_edges.csv` — columns `source,target,weight,edge_type`. Edges: agent→submolt (weight = post count, type `posts_in`), comment→post (type `comment_on_post`), comment→parent comment (type `reply_to_comment`). Comment edges are capped (e.g. last 5000) to keep file size bounded.
-  - **GraphML:** `exports/network.graphml` — nodes with `label` and `type` (agent/submolt/post/comment); edges with `weight` and `edge_type`. Compatible with Gephi, Cytoscape, and others that support GraphML.
+- **Script:** `scripts/export_network.py` reads from the same SQLite DB and writes to `<DATA_DIR>/exports/` (default `data/exports/`, gitignored):
+  - **Edge list CSV:** `<DATA_DIR>/exports/network_edges.csv` — columns `source,target,weight,edge_type`. Edges: agent→submolt (weight = post count, type `posts_in`), comment→post (type `comment_on_post`), comment→parent comment (type `reply_to_comment`). Comment edges are capped (e.g. last 5000) to keep file size bounded.
+  - **GraphML:** `<DATA_DIR>/exports/network.graphml` — nodes with `label` and `type` (agent/submolt/post/comment); edges with `weight` and `edge_type`. Compatible with Gephi, Cytoscape, and others that support GraphML.
 
 Run: `python scripts/export_network.py` (no API key required). Then open the CSV or GraphML in your tool of choice.
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # PURPOSE: Report grounded vs rhetoric finding counts per agent, per submolt, and over time.
 # DEPENDENCIES: config, src.storage
-# MODIFICATION NOTES: Read-only; writes to exports/grounded_ratios.md (or DATA_DIR/exports/).
+# MODIFICATION NOTES: Read-only; writes to DATA_DIR/exports/grounded_ratios.md (default data/exports/).
 
 import sys
 from pathlib import Path

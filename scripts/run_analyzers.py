@@ -23,7 +23,7 @@ from src.storage import get_connection, init_db, StorageWriter
 
 
 def write_alerts_file(settings, findings: list[Finding], analyzer_name: str) -> None:
-    """Append redacted alerts to exports/alerts.txt (gitignored). No raw secrets."""
+    """Append redacted alerts to DATA_DIR/exports/alerts.txt (gitignored). No raw secrets."""
     exports = settings.db_path.parent / "exports"
     exports.mkdir(parents=True, exist_ok=True)
     path = exports / "alerts.txt"

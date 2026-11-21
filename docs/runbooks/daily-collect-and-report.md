@@ -73,11 +73,11 @@ Steps inside `run_daily.py` (in order):
 
 1. **Canary (optional):** If `RUN_CANARY=1`, run `check_canary.py`; exit on failure.
 2. **Collect (optional):** If `MOLTBOOK_API_KEY` is set, run `run_collector.py` — fetches posts, feed, submolts, comments. Writes to DB.
-3. **Analyze:** `run_analyzers.py` — leak, injection, behavior analyzers; findings to DB and `exports/alerts.txt`.
-4. **Report:** `report_summary.py` — `exports/summary_report.md` and optionally `DAILY_REPORT_DIR/YYYY-MM-DD.md`.
-5. **Dashboard:** `generate_dashboard_html.py` — `exports/dashboard.html`.
-6. **Export:** `export_network.py` — `exports/network_edges.csv`, `exports/network.graphml`.
-7. **Summary (optional):** If `OLLAMA_ENABLED=1`, run `generate_daily_summary.py` — writes narrative to `DAILY_REPORT_DIR/YYYY-MM-DD-summary.md` (or `exports/`). Failure does not fail the daily run.
+3. **Analyze:** `run_analyzers.py` — leak, injection, behavior analyzers; findings to DB and `<DATA_DIR>/exports/alerts.txt`.
+4. **Report:** `report_summary.py` — `<DATA_DIR>/exports/summary_report.md` and optionally `DAILY_REPORT_DIR/YYYY-MM-DD.md`.
+5. **Dashboard:** `generate_dashboard_html.py` — `<DATA_DIR>/exports/dashboard.html`.
+6. **Export:** `export_network.py` — `<DATA_DIR>/exports/network_edges.csv`, `<DATA_DIR>/exports/network.graphml`.
+7. **Summary (optional):** If `OLLAMA_ENABLED=1`, run `generate_daily_summary.py` — writes narrative to `DAILY_REPORT_DIR/YYYY-MM-DD-summary.md` (or `<DATA_DIR>/exports/`). Failure does not fail the daily run.
 
 ## DB backup
 
@@ -91,7 +91,7 @@ cp "$DATA_DIR/watchtower.db" "$DATA_DIR/watchtower.db.bak.$(date +%Y%m%d)"
 
 ## DB and directory permissions
 
-Restrict access so only the process user can read `data/`, `logs/`, and `exports/`. On Unix: `chmod 700 data/ logs/ exports/` and `chmod 600 data/watchtower.db`. On Windows: restrict the directories to the run-as user (e.g. via Properties → Security). The DB may contain leaked credentials from findings.
+Restrict access so only the process user can read `data/` (which holds `data/exports/`) and `logs/`. On Unix: `chmod 700 data/ data/exports/ logs/` and `chmod 600 data/watchtower.db`. On Windows: restrict the directories to the run-as user (e.g. via Properties → Security). The DB may contain leaked credentials from findings.
 
 ## Run without API (offline)
 

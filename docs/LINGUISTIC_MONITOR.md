@@ -58,7 +58,7 @@ Findings use these prefixes so the dashboard and runbooks can group them:
 
 Ratios of **grounded_*** vs **ling_*** / **drift_*** help see which agents or submolts mix grounded language with rhetoric, and how that changes over time.
 
-- **Script:** Run `python scripts/grounded_ratios.py` to generate `exports/grounded_ratios.md` with:
+- **Script:** Run `python scripts/grounded_ratios.py` to generate `<DATA_DIR>/exports/grounded_ratios.md` with:
   - Per-agent: distinct items (post or comment) with at least one grounded finding vs rhetoric finding (top 30 by activity).
   - Per-submolt: same (top 20).
   - Trend: findings per day by prefix (grounded / rhetoric / other).

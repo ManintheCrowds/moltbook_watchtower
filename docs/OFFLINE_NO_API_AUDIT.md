@@ -96,7 +96,7 @@ python scripts/run_analyzers.py
 python scripts/report_summary.py
 python scripts/generate_dashboard_html.py
 python scripts/export_network.py   # optional
-# Outputs: exports/summary_report.md, exports/dashboard.html, exports/network_edges.csv, exports/network.graphml
+# Outputs: <DATA_DIR>/exports/summary_report.md, <DATA_DIR>/exports/dashboard.html, <DATA_DIR>/exports/network_edges.csv, <DATA_DIR>/exports/network.graphml
 ```
 
 Or use the single daily entrypoint without an API key (collector is skipped; LLM summary still runs if `OLLAMA_ENABLED` is set):

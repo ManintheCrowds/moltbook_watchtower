@@ -18,7 +18,7 @@ If you cannot get a key immediately (e.g. claim pending), treat this as a pendin
 1. **API key set** — `MOLTBOOK_API_KEY` in `.env` (watchdog agent claimed).
 2. **Run collector against live API** — `python scripts/run_collector.py` (fetches posts, feed, submolts, comments).
 3. **Run analyzers** — `python scripts/run_analyzers.py` (leak, injection, behavior).
-4. **Open dashboard** — `python scripts/generate_dashboard_html.py` then open `exports/dashboard.html` in a browser to verify data in tables and graphs.
+4. **Open dashboard** — `python scripts/generate_dashboard_html.py` then open `<DATA_DIR>/exports/dashboard.html` in a browser to verify data in tables and graphs.
 
 Optional: run report for summary markdown — `python scripts/report_summary.py`. For daily cron and env vars, see [runbooks/daily-collect-and-report.md](runbooks/daily-collect-and-report.md).
 
