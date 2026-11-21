@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # PURPOSE: Daily/weekly summary report — total posts, flagged counts; no raw secrets.
 # DEPENDENCIES: config, src.storage
-# MODIFICATION NOTES: Output to exports/; optional DAILY_REPORT_DIR for date-named file in repo.
+# MODIFICATION NOTES: Output to DATA_DIR/exports/; optional DAILY_REPORT_DIR for date-named file in repo.
 
 import os
 import sys

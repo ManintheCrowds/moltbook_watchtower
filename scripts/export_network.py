@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # PURPOSE: Export agent-submolt (and optional comment-thread) network from DB for external tools.
 # DEPENDENCIES: config, src.storage
-# MODIFICATION NOTES: IDs and counts only; no post/comment body. Writes to exports/ (gitignored).
+# MODIFICATION NOTES: IDs and counts only; no post/comment body. Writes to DATA_DIR/exports/ (gitignored).
 
 import csv
 import sys

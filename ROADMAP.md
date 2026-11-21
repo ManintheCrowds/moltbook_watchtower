@@ -2,7 +2,7 @@
 
 ## Near term
 
-- [ ] Dashboard screenshot in README (`exports/dashboard.html`)
+- [ ] Dashboard screenshot in README (`<DATA_DIR>/exports/dashboard.html`)
 - [ ] Optional hosted demo static export (sanitized sample data only)
 
 ## Medium term

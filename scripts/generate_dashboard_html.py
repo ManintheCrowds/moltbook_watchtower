@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # PURPOSE: Generate static HTML dashboard with tables and Chart.js graphs; no raw secrets.
 # DEPENDENCIES: config, src.storage
-# MODIFICATION NOTES: Embeds JSON in HTML for single-file portability; exports/dashboard.html (gitignored).
+# MODIFICATION NOTES: Embeds JSON in HTML for single-file portability; DATA_DIR/exports/dashboard.html (gitignored).
 
 import html as html_lib
 import json
@@ -1075,7 +1075,7 @@ table.sr-chart-table {{
 }})();
 </script>
 <footer class="dashboard-footer">
-<p>Bulk / offline network data: run <code>python scripts/export_network.py</code> from the repo (writes <code>exports/network_edges.csv</code> and <code>exports/network.graphml</code> beside your DB). See <code>docs/TELEMETRY_AND_NETWORK_VIZ.md</code> for Gephi, NodeXL, Cytoscape, and other tools.</p>
+<p>Bulk / offline network data: run <code>python scripts/export_network.py</code> from the repo (writes <code>exports/network_edges.csv</code> and <code>exports/network.graphml</code> in the <code>exports/</code> folder beside your DB, i.e. <code>DATA_DIR/exports/</code>). See <code>docs/TELEMETRY_AND_NETWORK_VIZ.md</code> for Gephi, NodeXL, Cytoscape, and other tools.</p>
 </footer>
 </body>
 </html>
